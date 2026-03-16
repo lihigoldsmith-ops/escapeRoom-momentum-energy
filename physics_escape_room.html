@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>חדר הבריחה הקסום – תנע ואנרגיה</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Assistant:wght@300;400;600;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #f0d080;
+    --gold-dark: #8a6a1a;
+    --parchment: #f5e6c8;
+    --parchment-dark: #d4c49a;
+    --text-light: #ede0c4;
+    --text-dim: #a09070;
+    --gryffindor-2: #d3a625;
+    --hufflepuff-2: #ecb939;
+    --ravenclaw-2: #946b2d;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Assistant', sans-serif;
+    background: #0a0a0f;
+    color: var(--text-light);
+    direction: rtl;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* ── Stars layer (absolute per-screen so no fixed issues in iframe) ── */
+  .stars-bg {
+    position: absolute;
+    inset: 0;
+    min-height: 100%;
+    background-image:
+      radial-gradient(1px 1px at 8%  12%, rgba(255,255,255,.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 23% 38%, rgba(255,255,255,.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 44%  9%, rgba(255,255,255,.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 61% 58%, rgba(255,255,255,.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 76% 23%, rgba(255,255,255,.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 87% 79%, rgba(255,255,255,.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at  4% 68%, rgba(255,255,255,.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 34% 84%, rgba(255,255,255,.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 91% 44%, rgba(255,255,255,.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 17% 91%, rgba(255,255,255,.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 69%  4%, rgba(255,255,255,.5) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 50% 50%, rgba(201,168,76,.3) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Screens ── */
+  .screen { display: none; position: relative; width: 100%; }
+  .screen.active { display: block; }
+
+  .screen-inner {
+    position: relative;
+    z-index: 1;
+    padding: 24px 14px 44px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ══════════════════════════════════════
+     INTRO
+  ══════════════════════════════════════ */
+  #intro-screen {
+    background: radial-gradient(ellipse at 50% 20%, #1a1030 0%, #0a0812 60%, #050508 100%);
+  }
+
+  .hogwarts-crest {
+    font-size: clamp(2.8rem, 9vw, 5rem);
+    text-align: center;
+    margin-bottom: 10px;
+    animation: float 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 18px rgba(201,168,76,.5));
+  }
+  @keyframes float { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-10px); } }
+
+  .main-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.25rem, 5vw, 2.6rem);
+    font-weight: 900;
+    color: var(--gold);
+    text-align: center;
+    text-shadow: 0 0 26px rgba(201,168,76,.6), 0 0 52px rgba(201,168,76,.2);
+    line-height: 1.3;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  .subtitle {
+    font-family: 'Kalam', cursive;
+    font-size: clamp(0.85rem, 2.8vw, 1.1rem);
+    color: var(--parchment-dark);
+    text-align: center;
+    margin-bottom: 18px;
+    opacity: .85;
+  }
+
+  .divider {
+    width: min(200px, 55%);
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 12px auto 18px;
+  }
+
+  .intro-card {
+    background: linear-gradient(135deg, #1a1628, #120f20);
+    border: 1px solid var(--gold-dark);
+    border-radius: 14px;
+    padding: clamp(18px,4vw,34px) clamp(14px,5vw,38px);
+    width: 100%;
+    max-width: 560px;
+    box-shadow: 0 0 36px rgba(0,0,0,.8), inset 0 0 36px rgba(201,168,76,.03);
+  }
+
+  .form-label {
+    font-family: 'Kalam', cursive;
+    font-size: clamp(0.9rem, 2.5vw, 1.05rem);
+    color: var(--gold-light);
+    display: block;
+    margin-bottom: 7px;
+    margin-top: 16px;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 11px 13px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid var(--gold-dark);
+    border-radius: 8px;
+    color: var(--parchment);
+    font-family: 'Assistant', sans-serif;
+    font-size: 1rem;
+    transition: all .3s;
+    text-align: right;
+    direction: rtl;
+  }
+  .form-input:focus { outline: none; border-color: var(--gold); background: rgba(201,168,76,.08); box-shadow: 0 0 12px rgba(201,168,76,.2); }
+
+  .house-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 7px; }
+
+  .house-btn {
+    padding: 11px 7px;
+    border: 2px solid transparent;
+    border-radius: 9px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: clamp(0.68rem, 2vw, 0.84rem);
+    font-weight: 700;
+    transition: all .3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,255,255,.04);
+    color: var(--text-dim);
+  }
+  .house-btn .house-emoji { font-size: clamp(1.3rem, 4vw, 1.8rem); }
+  .house-btn:hover { transform: translateY(-2px); }
+  .house-btn.selected-gryffindor { background: linear-gradient(135deg,#3d0000,#1a0000); border-color: var(--gryffindor-2); color: var(--gryffindor-2); box-shadow: 0 0 16px rgba(211,166,37,.3); }
+  .house-btn.selected-hufflepuff  { background: linear-gradient(135deg,#2a2000,#1a1400); border-color: var(--hufflepuff-2); color: var(--hufflepuff-2); box-shadow: 0 0 16px rgba(236,185,57,.3); }
+  .house-btn.selected-ravenclaw   { background: linear-gradient(135deg,#050e28,#020810); border-color: var(--ravenclaw-2);  color: var(--ravenclaw-2);  box-shadow: 0 0 16px rgba(148,107,45,.4); }
+  .house-btn.selected-slytherin   { background: linear-gradient(135deg,#0a1f10,#050f08); border-color: #4caf50;            color: #4caf50;            box-shadow: 0 0 16px rgba(76,175,80,.3); }
+
+  .start-btn {
+    width: 100%; margin-top: 22px; padding: 14px;
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold), var(--gold-dark));
+    border: none; border-radius: 9px;
+    color: #0a0810; font-family: 'Cinzel', serif;
+    font-size: clamp(0.88rem, 2.5vw, 1.05rem); font-weight: 900;
+    cursor: pointer; letter-spacing: 1px; transition: all .3s;
+    box-shadow: 0 4px 16px rgba(201,168,76,.4);
+  }
+  .start-btn:hover { transform: translateY(-2px); box-shadow: 0 7px 26px rgba(201,168,76,.6); filter: brightness(1.08); }
+
+  .hint-text {
+    font-family: 'Kalam', cursive;
+    font-size: 0.8rem;
+    color: rgba(201,168,76,.5);
+    margin-top: 8px;
+    text-align: center;
+    direction: rtl;
+  }
+
+  /* ══════════════════════════════════════
+     GAME SCREEN
+  ══════════════════════════════════════ */
+  #game-screen { background: radial-gradient(ellipse at 50% 0%, #15102a 0%, #0a0812 55%, #060508 100%); }
+
+  .game-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 16px;
+    background: linear-gradient(90deg, rgba(201,168,76,.1), rgba(201,168,76,.05), rgba(201,168,76,.1));
+    border: 1px solid rgba(201,168,76,.3);
+    border-radius: 10px; margin-bottom: 12px;
+    flex-wrap: wrap; gap: 6px;
+    width: 100%; max-width: 740px;
+  }
+  .header-info { font-family: 'Kalam', cursive; font-size: clamp(0.75rem,2.2vw,.92rem); color: var(--gold-light); white-space: nowrap; }
+  .header-info span { color: var(--parchment); }
+  .stage-indicator { font-family: 'Cinzel', serif; font-size: clamp(.78rem,2.2vw,.98rem); color: var(--gold); font-weight: 700; letter-spacing: 1px; }
+
+  .progress-bar-wrap { width: 100%; max-width: 740px; height: 5px; background: rgba(255,255,255,.1); border-radius: 3px; overflow: hidden; margin-bottom: 14px; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--gold-dark), var(--gold)); border-radius: 3px; transition: width .8s ease; box-shadow: 0 0 7px rgba(201,168,76,.5); }
+
+  .stage-container { width: 100%; max-width: 740px; }
+
+  .story-card {
+    background: linear-gradient(135deg, rgba(30,20,50,.95), rgba(20,15,35,.95));
+    border: 1px solid rgba(201,168,76,.4); border-radius: 12px;
+    padding: clamp(14px,3.5vw,22px) clamp(13px,4vw,24px);
+    margin-bottom: 12px; position: relative; overflow: hidden;
+  }
+  .story-card::before { content:''; position:absolute; top:0;left:0;right:0; height:3px; background:linear-gradient(90deg,transparent,var(--gold),transparent); }
+  .story-title { font-family:'Cinzel',serif; font-size:clamp(.95rem,3vw,1.25rem); color:var(--gold); margin-bottom:8px; }
+  .story-text { font-family:'Kalam',cursive; font-size:clamp(.85rem,2.4vw,.98rem); color:var(--parchment-dark); line-height:1.75; }
+
+  .questions-section { display:flex; flex-direction:column; gap:11px; margin-bottom:12px; }
+
+  .question-card {
+    background: linear-gradient(135deg,rgba(26,22,40,.9),rgba(18,15,30,.9));
+    border: 1px solid rgba(201,168,76,.2); border-radius:10px;
+    padding: clamp(13px,3vw,19px) clamp(13px,3.5vw,21px); transition:border-color .3s;
+  }
+  .question-card:hover { border-color:rgba(201,168,76,.4); }
+  .question-number { font-family:'Cinzel',serif; font-size:clamp(.68rem,2vw,.8rem); color:var(--gold-dark); letter-spacing:1px; margin-bottom:5px; }
+  .question-text { font-size:clamp(.85rem,2.4vw,.98rem); color:var(--text-light); line-height:1.65; margin-bottom:9px; font-weight:600; }
+  .question-formula {
+    font-family:'Kalam',cursive; font-size:clamp(.78rem,2.1vw,.88rem);
+    color:var(--gold-light); background:rgba(201,168,76,.08);
+    border:1px solid rgba(201,168,76,.2); border-radius:7px;
+    padding:6px 11px; margin-bottom:9px; display:inline-block;
+    direction:ltr; text-align:left; word-break:break-all; max-width:100%;
+  }
+  .answer-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .answer-label { font-family:'Kalam',cursive; font-size:.86rem; color:var(--text-dim); white-space:nowrap; }
+  .answer-input {
+    flex:1; min-width:75px; max-width:150px;
+    padding:8px 11px; background:rgba(255,255,255,.05);
+    border:1px solid rgba(201,168,76,.3); border-radius:7px;
+    color:var(--parchment); font-family:'Assistant',sans-serif;
+    font-size:1rem; font-weight:700; text-align:center; direction:ltr; transition:all .3s;
+  }
+  .answer-input:focus { outline:none; border-color:var(--gold); background:rgba(201,168,76,.08); box-shadow:0 0 9px rgba(201,168,76,.2); }
+  .answer-unit { font-size:.8rem; color:var(--text-dim); }
+
+  .code-section {
+    background:linear-gradient(135deg,rgba(20,15,35,.95),rgba(15,10,25,.95));
+    border:2px solid var(--gold-dark); border-radius:12px;
+    padding:clamp(15px,4vw,21px) clamp(13px,4vw,24px);
+    text-align:center; margin-bottom:10px;
+  }
+  .code-title { font-family:'Cinzel',serif; font-size:clamp(.9rem,2.5vw,1.08rem); color:var(--gold); margin-bottom:3px; letter-spacing:1px; }
+  .code-desc  { font-family:'Kalam',cursive; font-size:clamp(.8rem,2.2vw,.88rem); color:var(--text-dim); margin-bottom:13px; }
+  .code-input-row { display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap; }
+  .code-input {
+    padding:11px 14px; width:clamp(110px,28vw,148px);
+    background:rgba(0,0,0,.4); border:2px solid var(--gold-dark); border-radius:8px;
+    color:var(--gold-light); font-family:'Cinzel',serif;
+    font-size:clamp(1rem,3vw,1.35rem); font-weight:700;
+    text-align:center; direction:ltr; transition:all .3s;
+  }
+  .code-input:focus { outline:none; border-color:var(--gold); box-shadow:0 0 16px rgba(201,168,76,.3); background:rgba(201,168,76,.05); }
+  .submit-btn {
+    padding:12px clamp(14px,4vw,24px);
+    background:linear-gradient(135deg,#3d2800,var(--gold-dark),#3d2800);
+    border:1px solid var(--gold); border-radius:8px;
+    color:var(--gold-light); font-family:'Cinzel',serif;
+    font-size:clamp(.82rem,2.4vw,.98rem); font-weight:700;
+    cursor:pointer; letter-spacing:1px; transition:all .3s;
+    box-shadow:0 3px 11px rgba(201,168,76,.2); white-space:nowrap;
+  }
+  .submit-btn:hover { transform:translateY(-2px); box-shadow:0 5px 20px rgba(201,168,76,.4); background:linear-gradient(135deg,#5a3a00,var(--gold),#5a3a00); }
+
+  /* ══════════════════════════════════════
+     FEEDBACK  (inline block, no position:fixed)
+  ══════════════════════════════════════ */
+  .feedback-overlay {
+    display:none; width:100%; padding:18px 14px;
+    align-items:center; justify-content:center;
+    background:rgba(5,4,12,.92);
+  }
+  .feedback-overlay.visible { display:flex; }
+
+  .feedback-box {
+    border-radius:16px;
+    padding:clamp(24px,5.5vw,44px) clamp(18px,6vw,52px);
+    text-align:center; max-width:440px; width:100%;
+    animation:popIn .4s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes popIn { from{transform:scale(.8);opacity:0} to{transform:scale(1);opacity:1} }
+  .feedback-box.success { border:2px solid var(--gold); box-shadow:0 0 44px rgba(201,168,76,.3); background:linear-gradient(135deg,#1a1628,#120f20); }
+  .feedback-box.error   { border:2px solid #8b0000;     box-shadow:0 0 44px rgba(139,0,0,.4);   background:linear-gradient(135deg,#1a0808,#100506); }
+
+  .feedback-emoji { font-size:clamp(2.3rem,7vw,3.6rem); margin-bottom:10px; display:block; animation:pulseA 1s ease infinite; }
+  @keyframes pulseA { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
+  .feedback-title { font-family:'Cinzel',serif; font-size:clamp(1.05rem,3.5vw,1.5rem); font-weight:900; margin-bottom:9px; }
+  .feedback-box.success .feedback-title { color:var(--gold); }
+  .feedback-box.error   .feedback-title { color:#ff4444; }
+  .feedback-text { font-family:'Kalam',cursive; font-size:clamp(.85rem,2.3vw,.98rem); color:var(--parchment-dark); line-height:1.7; margin-bottom:18px; }
+  .feedback-btn { padding:11px clamp(18px,5vw,32px); border:none; border-radius:8px; font-family:'Cinzel',serif; font-size:clamp(.82rem,2.5vw,.98rem); font-weight:700; cursor:pointer; transition:all .3s; letter-spacing:1px; }
+  .feedback-box.success .feedback-btn { background:linear-gradient(135deg,var(--gold-dark),var(--gold)); color:#0a0810; box-shadow:0 3px 16px rgba(201,168,76,.4); }
+  .feedback-box.error   .feedback-btn { background:linear-gradient(135deg,#5a0000,#8b0000); color:#ffaaaa; border:1px solid #8b0000; }
+  .feedback-btn:hover { transform:translateY(-2px); filter:brightness(1.1); }
+
+  /* ══════════════════════════════════════
+     VICTORY SCREEN
+  ══════════════════════════════════════ */
+  #victory-screen {
+    background: radial-gradient(ellipse at 50% 25%, #1f1600 0%, #0e0b00 50%, #050400 100%);
+    overflow: hidden;
+  }
+
+  #confetti-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; z-index: 0;
+  }
+
+  .victory-inner {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 28px 14px 50px;
+    width: 100%; max-width: 660px;
+    margin: 0 auto; text-align: center;
+  }
+
+  /* glow ring */
+  .victory-glow-wrap { position:relative; margin-bottom:16px; }
+  .victory-glow-ring {
+    position:absolute; inset:-16px; border-radius:50%;
+    background:radial-gradient(circle,rgba(201,168,76,.22) 0%,transparent 70%);
+    animation:ringPulse 2.2s ease-in-out infinite;
+  }
+  @keyframes ringPulse { 0%,100%{transform:scale(1);opacity:.55} 50%{transform:scale(1.28);opacity:1} }
+  .victory-emoji-main { font-size:clamp(3.5rem,11vw,5.5rem); display:block; animation:float 3s ease-in-out infinite; position:relative; }
+
+  /* ── MAIN BANNER ── */
+  .victory-banner {
+    background: linear-gradient(135deg,#1c1500,#2e2000,#1c1500);
+    border: 3px solid var(--gold); border-radius:16px;
+    padding: clamp(22px,5vw,38px) clamp(18px,6vw,46px);
+    margin: 18px 0; width: 100%;
+    box-shadow: 0 0 0 1px rgba(201,168,76,.14), 0 0 36px rgba(201,168,76,.14), 0 0 70px rgba(201,168,76,.07);
+    position: relative; overflow: hidden;
+  }
+  .victory-banner::before,
+  .victory-banner::after { content:'✨'; position:absolute; font-size:1.9rem; opacity:.2; animation:cornerFloat 5s ease-in-out infinite; }
+  .victory-banner::before { top:10px; right:13px; animation-delay:0s; }
+  .victory-banner::after  { bottom:10px; left:13px; animation-delay:2.5s; }
+  @keyframes cornerFloat { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-6px) rotate(15deg)} }
+
+  .v-label {
+    font-family:'Cinzel',serif;
+    font-size:clamp(.7rem,2.1vw,.88rem);
+    letter-spacing:4px; color:var(--gold-dark); margin-bottom:9px;
+  }
+
+  /* Giant SUCCESS word */
+  .v-success {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2rem, 9vw, 4.2rem);
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow:
+      0 0 18px rgba(201,168,76,.85),
+      0 0 44px rgba(201,168,76,.45),
+      0 0 80px rgba(201,168,76,.2);
+    line-height: 1.05;
+    margin-bottom: 5px;
+    animation: glowPulse 2.6s ease-in-out infinite;
+    /* prevent overflow on small screens */
+    word-break: break-word;
+  }
+  @keyframes glowPulse {
+    0%,100%{ text-shadow:0 0 18px rgba(201,168,76,.85),0 0 44px rgba(201,168,76,.45); }
+    50%    { text-shadow:0 0 28px rgba(201,168,76,1),  0 0 65px rgba(201,168,76,.65),0 0 100px rgba(201,168,76,.3); }
+  }
+
+  .v-divider { width:60%; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin:12px auto; }
+
+  .v-group { font-family:'Cinzel',serif; font-size:clamp(1.3rem,5.5vw,2.2rem); font-weight:900; color:var(--parchment); margin-bottom:5px; line-height:1.3; word-break:break-word; }
+  .v-house  { font-family:'Cinzel',serif; font-size:clamp(.95rem,3.5vw,1.5rem); font-weight:700; color:var(--gold-light); margin-bottom:4px; }
+  .v-sub    { font-family:'Kalam',cursive; font-size:clamp(.88rem,2.4vw,1.02rem); color:var(--parchment-dark); line-height:1.72; margin-top:7px; }
+
+  /* ── SCREENSHOT BOX ── */
+  .screenshot-box {
+    background: linear-gradient(135deg,rgba(201,168,76,.11),rgba(201,168,76,.05));
+    border: 2px dashed var(--gold); border-radius:13px;
+    padding: clamp(16px,4vw,26px) clamp(14px,5vw,30px);
+    margin: 20px 0; width: 100%;
+  }
+  .sc-icon  { font-size:clamp(1.9rem,6vw,2.7rem); margin-bottom:9px; display:block; }
+  .sc-title { font-family:'Cinzel',serif; font-size:clamp(.95rem,3vw,1.25rem); color:var(--gold-light); font-weight:700; margin-bottom:9px; }
+  .sc-text  { font-family:'Kalam',cursive; font-size:clamp(.88rem,2.4vw,1.02rem); color:var(--parchment-dark); line-height:1.75; }
+  .sc-text strong { color:var(--gold); }
+
+  .shortcut-row { display:flex; justify-content:center; gap:10px; margin-top:13px; flex-wrap:wrap; }
+  .sc-chip {
+    background:rgba(0,0,0,.4); border:1px solid rgba(201,168,76,.3); border-radius:7px;
+    padding:6px 12px; font-family:'Assistant',sans-serif;
+    font-size:clamp(.73rem,2vw,.85rem); color:var(--text-dim); direction:ltr;
+  }
+  .sc-chip kbd { background:rgba(201,168,76,.14); border:1px solid rgba(201,168,76,.3); border-radius:3px; padding:1px 5px; color:var(--gold-light); font-family:monospace; font-size:.88em; }
+
+  /* ── badges ── */
+  .achievement-row { display:flex; justify-content:center; gap:11px; flex-wrap:wrap; margin:14px 0; }
+  .achievement { background:rgba(201,168,76,.08); border:1px solid rgba(201,168,76,.3); border-radius:9px; padding:9px 14px; font-size:clamp(1.1rem,4vw,1.45rem); text-align:center; min-width:64px; }
+  .achievement-label { font-family:'Kalam',cursive; font-size:clamp(.62rem,1.8vw,.76rem); color:var(--text-dim); margin-top:3px; }
+
+  .codes-line { font-family:'Kalam',cursive; font-size:clamp(.8rem,2.1vw,.92rem); color:var(--text-dim); margin-top:4px; }
+  .codes-line span { color:var(--gold); }
+
+  .restart-btn {
+    margin-top:24px; padding:13px clamp(22px,6vw,38px);
+    background:linear-gradient(135deg,var(--gold-dark),var(--gold),var(--gold-dark));
+    border:none; border-radius:10px; color:#0a0810;
+    font-family:'Cinzel',serif; font-size:clamp(.82rem,2.5vw,.98rem); font-weight:900;
+    cursor:pointer; letter-spacing:1px; transition:all .3s;
+    box-shadow:0 4px 16px rgba(201,168,76,.4);
+  }
+  .restart-btn:hover { transform:translateY(-3px); box-shadow:0 8px 30px rgba(201,168,76,.6); }
+
+  /* ── floating particles ── */
+  .magic-particles { position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+  .mp { position:absolute; font-size:clamp(.8rem,2.5vw,1.15rem); opacity:0; animation:drift linear infinite; }
+  @keyframes drift { 0%{transform:translateY(100%) rotate(0deg);opacity:0} 8%{opacity:.26} 92%{opacity:.26} 100%{transform:translateY(-70px) rotate(720deg);opacity:0} }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ INTRO ═══════════ -->
+<div id="intro-screen" class="screen active">
+  <div class="stars-bg"></div>
+  <div class="magic-particles" aria-hidden="true">
+    <span class="mp" style="left:5%;animation-duration:10s;animation-delay:0s">✨</span>
+    <span class="mp" style="left:22%;animation-duration:13s;animation-delay:3s">⚡</span>
+    <span class="mp" style="left:42%;animation-duration:9s;animation-delay:6s">🌟</span>
+    <span class="mp" style="left:67%;animation-duration:11s;animation-delay:1s">✨</span>
+    <span class="mp" style="left:84%;animation-duration:8s;animation-delay:7s">💫</span>
+  </div>
+  <div class="screen-inner">
+    <div class="hogwarts-crest">🏰</div>
+    <div class="main-title">חדר הבריחה הקסום<br>של הוגוורטס</div>
+    <div class="subtitle">⚡ תנע ואנרגיה – חמש יחידות לימוד ⚡</div>
+    <div class="divider"></div>
+    <div class="intro-card">
+      <div style="font-family:'Kalam',cursive;font-size:clamp(.85rem,2.3vw,.98rem);color:var(--parchment-dark);text-align:center;margin-bottom:14px;line-height:1.7">
+        ⚠️ <strong style="color:var(--gold)">שימו לב אחרי!</strong> ⚠️<br>
+        לורד וולדמורט השיל קסם על אוצרות הידע של הוגוורטס.<br>
+        רק תלמידים הבקיאים בחוקי הפיזיקה יוכלו לשחרר אותם!
+      </div>
+      <label class="form-label">🏆 שם הקבוצה שלכם:</label>
+      <input type="text" class="form-input" id="group-name-input" placeholder='למשל: "הנחשים המהירים"' />
+      <label class="form-label">🦁 בחרו את בית הוגוורטס שלכם:</label>
+      <div class="house-grid">
+        <button class="house-btn" onclick="selectHouse('gryffindor',this)">
+          <span class="house-emoji">🦁</span><span>גריפינדור</span>
+          <small style="font-size:.63rem;opacity:.62">אומץ ואצילות</small>
+        </button>
+        <button class="house-btn" onclick="selectHouse('hufflepuff',this)">
+          <span class="house-emoji">🦡</span><span>הופלפאף</span>
+          <small style="font-size:.63rem;opacity:.62">נאמנות וסבלנות</small>
+        </button>
+        <button class="house-btn" onclick="selectHouse('ravenclaw',this)">
+          <span class="house-emoji">🦅</span><span>ראוונקלאו</span>
+          <small style="font-size:.63rem;opacity:.62">חוכמה ולמידה</small>
+        </button>
+        <button class="house-btn" onclick="selectHouse('slytherin',this)">
+          <span class="house-emoji">🐍</span><span>סלית׳רין</span>
+          <small style="font-size:.63rem;opacity:.62">שאפתנות ותחכום</small>
+        </button>
+      </div>
+      <button class="start-btn" onclick="startGame()">⚡ לפתוח את שערי הוגוורטס ⚡</button>
+      <div class="hint-text" style="margin-top:9px">* כל שאלה תניב מספר. סכום 3 התשובות = קוד הפתיחה של השלב</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ GAME ═══════════ -->
+<div id="game-screen" class="screen">
+  <div class="stars-bg"></div>
+  <div class="magic-particles" aria-hidden="true">
+    <span class="mp" style="left:10%;animation-duration:11s;animation-delay:0s">✨</span>
+    <span class="mp" style="left:32%;animation-duration:14s;animation-delay:4s">⚡</span>
+    <span class="mp" style="left:57%;animation-duration:10s;animation-delay:2s">🌟</span>
+    <span class="mp" style="left:79%;animation-duration:12s;animation-delay:6s">💫</span>
+  </div>
+
+  <!-- Feedback lives here (not position:fixed) — safe in iframes -->
+  <div class="feedback-overlay" id="feedback-overlay">
+    <div class="feedback-box" id="feedback-box">
+      <span class="feedback-emoji" id="feedback-emoji">⚡</span>
+      <div class="feedback-title" id="feedback-title"></div>
+      <div class="feedback-text"  id="feedback-text"></div>
+      <button class="feedback-btn" id="feedback-btn" onclick="closeFeedback()">המשך</button>
+    </div>
+  </div>
+
+  <div class="screen-inner">
+    <div class="game-header">
+      <div class="header-info">🏰 <span id="display-group">הקבוצה</span></div>
+      <div class="stage-indicator" id="stage-indicator">שלב 1 / 4</div>
+      <div class="header-info" id="display-house-header">🦁 גריפינדור</div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progress-bar" style="width:25%"></div>
+    </div>
+    <div class="stage-container" id="stage-container"></div>
+  </div>
+</div>
+
+<!-- ═══════════ VICTORY ═══════════ -->
+<div id="victory-screen" class="screen">
+  <div class="stars-bg"></div>
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="victory-inner">
+    <!-- glow + trophy -->
+    <div class="victory-glow-wrap">
+      <div class="victory-glow-ring"></div>
+      <span class="victory-emoji-main">🏆</span>
+    </div>
+
+    <!-- BIG SUCCESS BANNER -->
+    <div class="victory-banner">
+      <div class="v-label">⚡ ניצחון מוחלט ⚡</div>
+      <div class="v-success">SUCCESS!</div>
+      <div class="v-divider"></div>
+      <div class="v-group" id="v-group-name">שם הקבוצה</div>
+      <div class="v-house"  id="v-house-name">בית ×</div>
+      <div class="v-divider" style="margin-top:12px"></div>
+      <div class="v-sub">
+        פרצתם את כל ארבעת שלבי קסמי הפיזיקה!<br>
+        וולדמורט נמלט — הוגוורטס חופשי! ✨
+      </div>
+    </div>
+
+    <!-- badges -->
+    <div class="achievement-row">
+      <div class="achievement">⚡<div class="achievement-label">כל השלבים</div></div>
+      <div class="achievement">🔮<div class="achievement-label">קוד פוצח</div></div>
+      <div class="achievement">📚<div class="achievement-label">פיזיקאים</div></div>
+      <div class="achievement">🏅<div class="achievement-label">אלופים</div></div>
+    </div>
+    <div class="codes-line">🧪 קודי השלבים: <span id="v-codes"></span></div>
+
+    <!-- SCREENSHOT INSTRUCTION -->
+    <div class="screenshot-box">
+      <span class="sc-icon">📸</span>
+      <div class="sc-title">📋 צלמו צילום מסך ושלחו למורה!</div>
+      <div class="sc-text">
+        כדי לקבל קרדיט על השלמת חדר הבריחה,<br>
+        <strong>צלמו את המסך הזה עם שם הקבוצה והבית</strong><br>
+        ושלחו את התמונה למורה כהוכחת השלמה. ✅
+      </div>
+      <div class="shortcut-row">
+        <div class="sc-chip">🪟 Windows: <kbd>Win</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></div>
+        <div class="sc-chip">🍎 Mac: <kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>4</kbd></div>
+        <div class="sc-chip">📱 נייד: Power + Volume</div>
+      </div>
+    </div>
+
+    <button class="restart-btn" onclick="restartGame()">🔄 משחק חדש</button>
+  </div>
+</div>
+
+<!-- ═══════════ JS ═══════════ -->
+<script>
+/* ── DATA ─────────────────────────────── */
+const STAGES = [
+  {
+    id:1, title:"🏰 האולם הגדול", code:180,
+    story:`כשהגעתם לאולם הגדול, מצאתם אותו מוקף בפנסים מרחפים — אך הם כבו כולם!\nדמבלדור הסביר: "וולדמורט גנב את האנרגיה מהפנסים. רק ידע בפיזיקה יחזיר את האור!"\nענו על שלוש שאלות, צרפו את התשובות — וקוד הפתיחה יתגלה.`,
+    questions:[
+      { num:"שאלה א׳", emoji:"🕯️", topic:"אנרגיה פוטנציאלית גרביטציונית",
+        text:`פנס קסום במשקל 2 ק"ג מרחף בגובה 5 מטר מעל רצפת האולם הגדול.\nחשבו את האנרגיה הפוטנציאלית הגרביטציונית של הפנס (g = 10 מ/ש²).`,
+        formula:"Ep = m · g · h", unit:"ג'אול [J]", answer:100, hint:"Ep = 2 × 10 × 5 = 100 J" },
+      { num:"שאלה ב׳", emoji:"🧹", topic:"חוק ניוטון השלישי – פעולה ותגובה",
+        text:`הארי פוטר דוחף מטאטא שחרטו קסם עליו בכוח של 30 ניוטון.\nמה גודל כוח התגובה שמפעיל המטאטא על ידו של הארי?`,
+        formula:"F_פעולה = F_תגובה", unit:"ניוטון [N]", answer:30, hint:"לפי חוק ניוטון השלישי: כוח התגובה = 30 N" },
+      { num:"שאלה ג׳", emoji:"⚡", topic:"משפט עבודה-אנרגיה",
+        text:`כדור הברזל של ג'יני וויזלי (מסה 1 ק"ג) מואץ ממנוחה עד למהירות 10 מ/ש.\nחשבו את העבודה הכוללת שנעשתה על הכדור.`,
+        formula:"W = ΔKE = ½mv₂² − ½mv₁²", unit:"ג'אול [J]", answer:50, hint:"W = ½ × 1 × 10² − 0 = 50 J" }
+    ]
+  },
+  {
+    id:2, title:"🧪 כיתת הקסמים", code:22,
+    story:`"שיעור מספרי הקסם מתחיל!" קרא פרופסור סנייפ בקול קר.\n"וולדמורט הצפין את נוסחאות הקסמים בתוך תרגילי פיזיקה — פצחו אותם, אחרת לא תצאו מכאן!"\nריח ענני בושם ססגוניים מילא את האוויר. שעון החול החל לנוע...`,
+    questions:[
+      { num:"שאלה א׳", emoji:"🎢", topic:"שימור אנרגיה – מסלול ללא חיכוך",
+        text:`פיל פלור נסחפת ממנוחה ממשגב בגובה 5 מטר במסלול ללא חיכוך.\nמה מהירותה בתחתית המסלול? (g = 10 מ/ש²)`,
+        formula:"mgh = ½mv²  →  v = √(2gh)", unit:"מ/ש [m/s]", answer:10, hint:"v = √(2 × 10 × 5) = √100 = 10 m/s" },
+      { num:"שאלה ב׳", emoji:"🌀", topic:"אנרגיה פוטנציאלית אלסטית",
+        text:`קפיץ קסום עם קבוע קפיץ k = 200 נ/מ נמתח 0.3 מטר מנקודת שיווי משקל.\nחשבו את האנרגיה הפוטנציאלית האלסטית.`,
+        formula:"Ep = ½ · k · x²", unit:"ג'אול [J]", answer:9, hint:"Ep = ½ × 200 × 0.3² = 9 J" },
+      { num:"שאלה ג׳", emoji:"🔮", topic:"שימור אנרגיה – כדור מוקפץ",
+        text:`קפיץ קסום בעל אנרגיה פוטנציאלית 9 ג'אול מקפיץ כדור שרביט שמסתו 2 ק"ג.\nמה מהירות הכדור מיד אחרי שחרורו?`,
+        formula:"Ep = ½mv²  →  v = √(2Ep / m)", unit:"מ/ש [m/s]", answer:3, hint:"v = √(2 × 9 / 2) = √9 = 3 m/s" }
+    ]
+  },
+  {
+    id:3, title:"🌲 היער האסור", code:60,
+    story:`עצי היער האפלים ארגו את ענפיהם כחומות חשוכות סביבכם.\nקנטאורים ושדים מסתובבים בין העצים.\n"עברו את מבחן הפגישה — ראו מה קורה כשגופים מתנגשים!" צחק פוקה-בריק בזדון.\nהזמן קצר. הפיזיקה ברורה. קדימה!`,
+    questions:[
+      { num:"שאלה א׳", emoji:"💥", topic:"התנגשות פלסטית (דביקה)",
+        text:`קנטאור במסה 200 ק"ג דוהר במהירות 5 מ/ש ומתנגש בשד (טרול) עומד במסה 300 ק"ג.\nלאחר ההתנגשות הם נצמדים יחד. מה מהירותם המשותפת?`,
+        formula:"m₁v₁ = (m₁+m₂)·vf", unit:"מ/ש [m/s]", answer:2, hint:"vf = (200×5)/(200+300) = 1000/500 = 2 m/s" },
+      { num:"שאלה ב׳", emoji:"🌊", topic:"אימפולס-תנע",
+        text:`רוח קסומה מפעילה כוח 100 ניוטון על מטה קסם למשך 0.5 שניות.\nחשבו את גודל האימפולס.`,
+        formula:"J = F · Δt", unit:"נ·ש [N·s]", answer:50, hint:"J = 100 × 0.5 = 50 N·s" },
+      { num:"שאלה ג׳", emoji:"🎯", topic:"התנגשות אלסטית – מסות שוות",
+        text:`שני כדורי קסם זהים (מסות שוות). הכדור הראשון נע במהירות 8 מ/ש ופוגע בכדור השני שנמצא במנוחה — בהתנגשות אלסטית.\nמה מהירות הכדור השני לאחר ההתנגשות?`,
+        formula:"בהתנגשות אלסטית בין מסות שוות: v₂f = v₁i", unit:"מ/ש [m/s]", answer:8, hint:"הראשון עוצר, השני ממשיך ב-8 m/s" }
+    ]
+  },
+  {
+    id:4, title:"⚔️ המאבק הסופי", code:232,
+    story:`הגיעתם לאולם הקרב. צלליות חשוכות מרחפות בפינות.\nוולדמורט עומד באמצע, עיניו מלאות קרח.\n"גיבורי הפיזיקה!" קרא בלעג. "נסו את שלוש הבחינות האחרונות!"\nהגורל של הוגוורטס כולו תלוי בידיכם. אל תכשלו!`,
+    questions:[
+      { num:"שאלה א׳", emoji:"🏹", topic:"מטוטלת בליסטית",
+        text:`כדור קסם ממסה 0.01 ק"ג נורה לתוך גוש עץ קסום ממסה 0.99 ק"ג. הגוש עם הכדור הכלוא מתנדנד ועולה לגובה 0.2 מטר.\nמה הייתה מהירות הכדור מיד לפני הפגיעה? (g = 10 מ/ש²)`,
+        formula:"mv₀ = (m+M)·√(2gh)", unit:"מ/ש [m/s]", answer:200, hint:"v_block=√(2×10×0.2)=2 → v₀=(1×2)/0.01=200 m/s" },
+      { num:"שאלה ב׳", emoji:"🔥", topic:"כוחות לא-משמרים",
+        text:`גלשן מסה 3 ק"ג יורד מגובה h = 3 מ׳ (אורך מסלול 4 מ׳) עם חיכוך. בתחתית יש לו אנרגיה קינטית של 60 ג'אול בלבד.\nחשבו את גודל עבודת החיכוך (ערך מוחלט).`,
+        formula:"W_חיכוך = ΔKE − W_כבידה", unit:"ג'אול [J]", answer:30, hint:"W_כבידה=3×10×3=90 J ; W_f=60−90=−30 J → |W_f|=30 J" },
+      { num:"שאלה ג׳", emoji:"🧠", topic:"שאלת הגיון – אנרגיה מכנית",
+        text:`כאשר כוחות חיכוך פועלים על גוף ואנרגיה הולכת לאיבוד כחום — מה קורה לאנרגיה המכנית הכוללת של המערכת?\n▪ מגדילה (1)\n▪ קטנה (2)\n▪ נשארת קבועה (3)\n\nרשמו את המספר המתאים:`,
+        formula:"Emech = KE + PE", unit:"(מספר בלבד)", answer:2, hint:"חיכוך גורם לאנרגיה המכנית לקטון — התשובה היא 2" }
+    ]
+  }
+];
+
+const HOUSE_NAMES = { gryffindor:'גריפינדור 🦁', hufflepuff:'הופלפאף 🦡', ravenclaw:'ראוונקלאו 🦅', slytherin:'סלית׳רין 🐍' };
+const SUCCESS_MSG = [
+  '🕯️ האולם הגדול מואר שוב! הפנסים מרחפים בתהילה. הארי פוטר מחייך אליכם ברצון!',
+  '🧪 "מצוין!" קולו הקר של סנייפ ניסה להסתיר את הפתעתו. "עברו לחדר הבא."',
+  '🌲 הקנטאורים יכרעו בפניכם ביחד עם האוניקורן הזהב. היער פותח את שעריו!'
+];
+
+/* ── STATE ─────────────────────────────── */
+let S = { house:null, group:'', stage:0, codes:[] };
+let feedbackCb = null, hintsOn = false;
+
+/* ── INTRO ─────────────────────────────── */
+function selectHouse(h, btn) {
+  S.house = h;
+  document.querySelectorAll('.house-btn').forEach(b => b.className='house-btn');
+  btn.classList.add('selected-'+h);
+}
+function startGame() {
+  const gn = document.getElementById('group-name-input').value.trim();
+  if (!gn)      { alert('⚡ אנא הזינו שם קבוצה!'); return; }
+  if (!S.house) { alert('🏰 אנא בחרו בית!');       return; }
+  S.group=''; S.group=gn; S.stage=0; S.codes=[];
+  document.getElementById('display-group').textContent=gn;
+  document.getElementById('display-house-header').textContent=HOUSE_NAMES[S.house];
+  showScreen('game-screen'); renderStage(0);
+}
+
+/* ── RENDER STAGE ──────────────────────── */
+function renderStage(idx) {
+  const sg=STAGES[idx]; hintsOn=false;
+  document.getElementById('progress-bar').style.width=((idx+1)/4*100)+'%';
+  document.getElementById('stage-indicator').textContent=`שלב ${idx+1} / 4`;
+  let qH='';
+  sg.questions.forEach((q,qi)=>{
+    qH+=`<div class="question-card">
+      <div class="question-number">${q.emoji} ${q.num} — ${q.topic}</div>
+      <div class="question-text">${q.text.replace(/\n/g,'<br>')}</div>
+      <div class="question-formula" dir="ltr">${q.formula}</div>
+      <div class="answer-row">
+        <span class="answer-label">תשובה:</span>
+        <input type="number" class="answer-input" id="ans-${idx}-${qi}" placeholder="?" step="any" inputmode="decimal"/>
+        <span class="answer-unit">${q.unit}</span>
+      </div>
+      <div id="hint-${idx}-${qi}" class="hint-text" style="display:none;color:rgba(201,168,76,.72);margin-top:7px">💡 רמז: ${q.hint}</div>
+    </div>`;
+  });
+  document.getElementById('stage-container').innerHTML=`
+    <div class="story-card">
+      <div class="story-title">${sg.title}</div>
+      <div class="story-text">${sg.story.replace(/\n/g,'<br>')}</div>
+    </div>
+    <div class="questions-section">${qH}</div>
+    <div class="code-section">
+      <div class="code-title">🔐 קוד הפתיחה של השלב</div>
+      <div class="code-desc">קוד = תשובה א׳ + תשובה ב׳ + תשובה ג׳</div>
+      <div class="code-input-row">
+        <input type="number" class="code-input" id="code-${idx}" placeholder="???" inputmode="decimal"/>
+        <button class="submit-btn" onclick="checkCode(${idx})">🔓 פתח את החדר!</button>
+      </div>
+      <div class="hint-text" style="margin-top:11px">
+        <span style="cursor:pointer;text-decoration:underline;color:rgba(201,168,76,.58)" onclick="toggleHints(${idx})">💡 רמז לשאלות (לחצו לגלות)</span>
+      </div>
+    </div>`;
+  goTop();
+}
+
+function toggleHints(idx){
+  hintsOn=!hintsOn;
+  STAGES[idx].questions.forEach((_,qi)=>{
+    const el=document.getElementById(`hint-${idx}-${qi}`);
+    if(el) el.style.display=hintsOn?'block':'none';
+  });
+}
+
+/* ── CHECK CODE ────────────────────────── */
+function checkCode(idx){
+  const val=parseFloat(document.getElementById(`code-${idx}`).value);
+  if(isNaN(val)){ showFB('error','🤔 שכחתם להזין קוד!','לא ניתן לפתוח את החדר ללא הקוד...','נסו שוב'); return; }
+  if(Math.abs(val-STAGES[idx].code)<0.01){
+    S.codes.push(STAGES[idx].code);
+    if(idx<3){
+      showFB('success',`✨ שלב ${idx+1} הושלם! ✨`,SUCCESS_MSG[idx],'לשלב הבא! ⚡',()=>{ S.stage=idx+1; renderStage(idx+1); });
+    } else {
+      showFB('success','🏆 ניצחון מוחלט! 🏆','פרצתם את כל ארבעת שלבי קסמי הפיזיקה! וולדמורט נמלט! הוגוורטס חופשי!','לצפות בניצחון! 🎉',showVictory);
+    }
+  } else {
+    showFB('error','🚫 שגיאת מגלים! (Muggle Error)',`הקוד "${val}" שגוי. בדקו שוב את חישוביכם!<br>זכרו: קוד = סכום שלוש התשובות.`,'לנסות שוב 🔮');
+  }
+}
+
+/* ── FEEDBACK ──────────────────────────── */
+function showFB(type,title,text,btn,cb){
+  feedbackCb=cb||null;
+  const ov=document.getElementById('feedback-overlay');
+  const bx=document.getElementById('feedback-box');
+  document.getElementById('feedback-emoji').textContent=type==='success'?'✨':'💀';
+  document.getElementById('feedback-title').textContent=title;
+  document.getElementById('feedback-text').innerHTML=text;
+  document.getElementById('feedback-btn').textContent=btn;
+  bx.className='feedback-box '+type;
+  ov.classList.add('visible');
+  goTop();
+}
+function closeFeedback(){
+  document.getElementById('feedback-overlay').classList.remove('visible');
+  if(feedbackCb){ const fn=feedbackCb; feedbackCb=null; setTimeout(fn,150); }
+}
+
+/* ── VICTORY ───────────────────────────── */
+function showVictory(){
+  document.getElementById('v-group-name').textContent = S.group;
+  document.getElementById('v-house-name').textContent  = 'בית '+HOUSE_NAMES[S.house];
+  document.getElementById('v-codes').textContent       = S.codes.join(' + ')+' = '+S.codes.reduce((a,b)=>a+b,0);
+  showScreen('victory-screen');
+  startConfetti();
+}
+
+/* ── CONFETTI (canvas, no lib) ─────────── */
+function startConfetti(){
+  const canvas=document.getElementById('confetti-canvas');
+  const vScreen=document.getElementById('victory-screen');
+  const ctx=canvas.getContext('2d');
+  function resize(){ canvas.width=vScreen.offsetWidth||window.innerWidth; canvas.height=vScreen.offsetHeight||window.innerHeight; }
+  resize(); window.addEventListener('resize',resize);
+  const COLS=['#c9a84c','#f0d080','#fff','#ede0c4','#d3a625','#ecb939','#8a6a1a'];
+  const pts=Array.from({length:85},()=>({
+    x:Math.random()*canvas.width, y:Math.random()*canvas.height-canvas.height,
+    w:6+Math.random()*8, h:9+Math.random()*6,
+    r:Math.random()*Math.PI*2, dr:(Math.random()-.5)*.11,
+    dy:1.5+Math.random()*2.4, dx:(Math.random()-.5)*1.2,
+    c:COLS[Math.floor(Math.random()*COLS.length)], a:.8+Math.random()*.2
+  }));
+  let running=true;
+  (function draw(){
+    if(!running) return;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    pts.forEach(p=>{
+      ctx.save(); ctx.globalAlpha=p.a; ctx.fillStyle=p.c;
+      ctx.translate(p.x,p.y); ctx.rotate(p.r);
+      ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      ctx.restore();
+      p.x+=p.dx; p.y+=p.dy; p.r+=p.dr;
+      if(p.y>canvas.height+20){ p.y=-20; p.x=Math.random()*canvas.width; }
+    });
+    requestAnimationFrame(draw);
+  })();
+  setTimeout(()=>{ running=false; ctx.clearRect(0,0,canvas.width,canvas.height); },9000);
+}
+
+/* ── UTILS ─────────────────────────────── */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  goTop();
+}
+function goTop(){
+  try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){}
+  try{ document.documentElement.scrollTop=0; }catch(e){}
+}
+function restartGame(){
+  S={house:null,group:'',stage:0,codes:[]};
+  hintsOn=false;
+  document.getElementById('group-name-input').value='';
+  document.querySelectorAll('.house-btn').forEach(b=>b.className='house-btn');
+  showScreen('intro-screen');
+}
+
+/* Enter key shortcut */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    const ci=document.getElementById(`code-${S.stage}`);
+    if(document.activeElement===ci) checkCode(S.stage);
+  }
+});
+</script>
+</body>
+</html>
